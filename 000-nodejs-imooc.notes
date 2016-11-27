@@ -1,0 +1,83 @@
+#Buffer
+- 将字符串转换为二进制字节
+> new Buffer('Hello 慕课网');
+<Buffer 48 65 6c 6c 6f 20 e6 85 95 e8 af be e7 bd 91>
+
+48 65 6c 6c 6f => Hello
+20 => 空格
+e6 85 95 =》慕
+e8 af be =》课
+e7 bd 91 =》网
+
+- 转换时默认按照utf-8	
+- 也可以按照其他编码转换
+> new Buffer('Hello 慕课网', 'base64');
+<Buffer 1d e9 65 a1 44>
+
+var b = new Buffer('Hello 慕课网','base64'); 
+因为中文`慕课网`三个字不在 base64 的“值域”里，所以这样编码成二进制数据时，丢失了信息。利用编码出来的 Buffer 不能完整恢复原来的信息了。也就是说，接下来如果执行 b.toString('base64') 不能得到完整的 "Hello 慕课网" 这个字符串了。
+用 utf-8 方法编码就可以。
+个人感觉，当使用一种编码方式把字符串转化成 Buffer 时，为防止信息丢失，应该确保这个字符串在此种编码方式的“值域”里。
+
+-分配一定长度的内存区域
+> var buf = new Buffer(8);
+> buf.length
+8
+
+> var buf = new Buffer('12345678'); console.log(buf);
+<Buffer 31 32 33 34 35 36 37 38>
+
+- 由于buffer长度只有7个字节，超出部分未写入
+> var buf = new Buffer(7); buf.write('12345678'); console.log(buf);
+<Buffer 31 32 33 34 35 36 37>
+
+- 通过数组创建buffer
+> var buf = new Buffer([1,2,3,4]); console.log(buf);
+<Buffer 01 02 03 04>
+- 通过数组创建buffer可以通过下标访问
+> var buf = new Buffer([1,2,3,4]); console.log(buf);
+<Buffer 01 02 03 04>
+
+- 创建的Buffer长度是不变的， 如果不传offset参数，将从第0位覆盖掉原有数据
+> var buf = new Buffer('Hello 慕课网')
+> buf.length
+15
+> buf.write('Hi 慕课网')
+12
+> buf.toString()
+'Hi 慕课网网'
+> buf.length
+
+> buf.write(' ImoocImoocImooc', 2, 16)
+13
+> buf.toString();
+'Hi ImoocImoocIm'
+
+//copy: 
+> var buf = new Buffer('Hello Imooc');
+> buf.length;
+11
+> var buf2 = new Buffer(5);
+> buf.copy(buf2);
+5
+> buf2.toString();
+'Hello'
+//从0位开始写，拷贝从6位到11位的内容
+> buf.copy(buf2,0,6,11);
+5
+> buf2.toString();
+'Imooc'
+
+
+> var buf = new Buffer('imooc');
+> var str = buf.toString('base64');
+> str
+'aW1vb2M='
+> var buf = new Buffer('aW1vb2M=', 'base64')
+> buf.toString();
+'imooc'
+> buf.toString('hex')
+'696d6f6f63'
+> var buf = new Buffer('696d6f6f63', 'hex')
+> buf.toString()
+'imooc'
